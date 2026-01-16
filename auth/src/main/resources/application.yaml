@@ -3,3 +3,7 @@ spring:
     name: auth-service
   config:
     import: "optional:configserver:http://localhost:8888/"
+
+app:
+  cors:
+    allowed-origins: "http://localhost:3000,http://localhost:5173,http://localhost:8080"
