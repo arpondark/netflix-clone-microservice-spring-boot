@@ -1,0 +1,77 @@
+package com.arpon007.netflixclone.auth.security;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+import java.util.function.Function;
+
+@Component
+public class JwtUtil {
+
+    @Value("${spring.security.jwt.expiration}")
+    private long jwtExpiration;
+
+    @Value("${spring.security.jwt.secret}")
+    private String secret;
+
+    private SecretKey getSigninKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    public String getUserNameFromToken(String token) {
+        return getClaimFromToken(token, Claims::getSubject);
+    }
+
+    public String gerRoleFromToken(String token) {
+        return getClaimFromToken(token, claims -> claims.get("role", String.class));
+    }
+
+    public Date getExpirationDateFromToken(String token) {
+        return getClaimFromToken(token, Claims::getExpiration);
+    }
+
+    private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = getAllClaimFromToken(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private Claims getAllClaimFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigninKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public boolean isTokenExpired(String token) {
+        return getExpirationDateFromToken(token).before(new Date());
+    }
+
+    public String generateToken(String username, String role) {
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("role", role)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(getSigninKey()).compact();
+    }
+
+    public Boolean validateToken(String authToken) {
+        try {
+            getUserNameFromToken(authToken);
+            return !isTokenExpired(authToken); // if expired return false if not then true
+        } catch (Exception e) {
+            return false;
+        }
+
+    }
+
+    public String getRoleFromToken(String jwt) {
+        return getClaimFromToken(jwt, claims -> claims.get("role", String.class));
+    }
+}
