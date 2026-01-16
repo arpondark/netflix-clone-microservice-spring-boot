@@ -7,7 +7,9 @@ import com.arpon007.netflixclone.auth.dto.request.ResetPassword;
 import com.arpon007.netflixclone.auth.dto.request.UserRequest;
 import com.arpon007.netflixclone.auth.dto.response.LoginResponse;
 import com.arpon007.netflixclone.auth.dto.response.MessageResponse;
+import com.arpon007.netflixclone.auth.event.UserSignupEvent;
 import com.arpon007.netflixclone.auth.service.AuthService;
+import com.arpon007.netflixclone.auth.service.KafkaProducerService;
 import com.arpon007.netflixclone.auth.repository.UserRepository;
 import com.arpon007.netflixclone.auth.entity.User;
 import com.arpon007.netflixclone.auth.enums.Role;
@@ -41,6 +43,9 @@ public class AuthController {
     @Autowired
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private KafkaProducerService kafkaProducerService;
+
     /**
      * Register a new user
      */
@@ -62,6 +67,10 @@ public class AuthController {
         user.setEmailVerified(false);
 
         userRepository.save(user);
+
+        // Publish user signup event to Kafka
+        UserSignupEvent event = new UserSignupEvent(user.getEmail(), user.getFullName());
+        kafkaProducerService.publishUserSignupEvent(event);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new MessageResponse("User registered successfully"));

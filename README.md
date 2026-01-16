@@ -100,11 +100,9 @@ Update database credentials in configuration files if different from defaults:
 - Default password: `arpon007`
 - Default host: `localhost:5432`
 
-### 2. Kafka Setup (Optional - Not Yet Integrated)
+### 2. Kafka Setup
 
-> **Note**: Kafka infrastructure is provided via Docker Compose for future use, but it is **not currently integrated** into the services. The Auth Service has the Kafka dependency but no active configuration or usage. The Email Service does not have Kafka configured. This section documents how to set up Kafka for future integration.
-
-Kafka can be used for asynchronous messaging between services (e.g., Auth Service publishing events, Email Service consuming them).
+Kafka is integrated for sending welcome emails when users sign up. The Auth Service publishes user signup events to Kafka, and the Email Service consumes these events to send welcome emails.
 
 #### Option A: Using Docker Compose (Recommended)
 
