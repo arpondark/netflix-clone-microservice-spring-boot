@@ -100,9 +100,11 @@ Update database credentials in configuration files if different from defaults:
 - Default password: `arpon007`
 - Default host: `localhost:5432`
 
-### 2. Kafka Setup
+### 2. Kafka Setup (Optional - Not Yet Integrated)
 
-Kafka is used for asynchronous messaging between services (e.g., Auth Service publishes events, Email Service consumes them).
+> **Note**: Kafka infrastructure is provided via Docker Compose for future use, but it is **not currently integrated** into the services. The Auth Service has the Kafka dependency but no active configuration or usage. The Email Service does not have Kafka configured. This section documents how to set up Kafka for future integration.
+
+Kafka can be used for asynchronous messaging between services (e.g., Auth Service publishing events, Email Service consuming them).
 
 #### Option A: Using Docker Compose (Recommended)
 
